@@ -1,81 +1,126 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
+class Graph {
+    private Map<Integer, List<Edge>> adjacencyMap;
+    final String filePath = "DijkstraOutput.txt";
+    FileWriter fileWriter;
+    BufferedWriter bufferedWriter;
+    class Edge {
+        int vertex;
+        int weight;
 
-public class WeightedGraph {
-    int v;
-
-    // HOLDS VERTEX
-    HashMap<Integer,
-            // HOLDS LIST OF DEST VERTEX AND WEIGHTED PATH
-            ArrayList<HashMap<Integer, Integer>>>
-                // HASHMAP NAME
-                graphList;
-
-    WeightedGraph(){
-        this.graphList = new HashMap<>();
-    }
-    private void printVertex(){
-        for ( int vertex : this.graphList.keySet() ){
-            System.out.println(vertex + " ");
+        Edge(int vertex, int weight) {
+            this.vertex = vertex;
+            this.weight = weight;
         }
     }
-    public void printAdjWithDistance(){
-        for ( int vertex : this.graphList.keySet()){
-            System.out.print("Vertex " + vertex + ": ");
-            for ( int j = 0; j < this.graphList.get(vertex).size(); j++){
-                System.out.print(this.graphList.get(vertex).get(j).entrySet() + " ");
+    public Graph() {
+        adjacencyMap = new HashMap<>();
+        try {
+            fileWriter = new FileWriter(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void addVertex(int vertex) {
+        adjacencyMap.putIfAbsent(vertex, new ArrayList<>());
+    }
+    public void addEdge(int source, int destination, int weight) {
+        adjacencyMap.putIfAbsent(source, new ArrayList<>());
+        adjacencyMap.putIfAbsent(destination, new ArrayList<>());
+        adjacencyMap.get(source).add(new Edge(destination, weight));
+        // UNDIRECTED GRAPH LINE OF CODE
+        adjacencyMap.get(destination).add(new Edge(source, weight));
+    }
+
+    public void dijkstra(int startVertex, int targetVertex) {
+        Map<Integer, Integer> distances = new HashMap<>();
+        Map<Integer, Integer> predecessors = new HashMap<>();
+        PriorityQueue<Edge> pq = new PriorityQueue<>(Comparator.comparingInt(edge -> edge.weight));
+        Set<Integer> visited = new HashSet<>();
+        for (Integer vertex : adjacencyMap.keySet()) {
+            distances.put(vertex, Integer.MAX_VALUE);
+        }
+        distances.put(startVertex, 0);
+        pq.add(new Edge(startVertex, 0));
+
+        while (!pq.isEmpty()) {
+            Edge currentEdge = pq.poll();
+            int vertex = currentEdge.vertex;
+
+            // If we have reached the target vertex, we can stop
+            if (vertex == targetVertex) {
+                break;
             }
-            System.out.println();
-        }
-    }
-    public void addEdge(int s, int e, int w){
-        HashMap<Integer, Integer> temp = new HashMap<>();
-        temp.put(e, w);
-        HashMap<Integer, Integer> tempTwo = new HashMap<>();
-        tempTwo.put(s, w);
-        if(!this.graphList.containsKey(s) ){
-            addVertex(s);
-            this.graphList.get(s).add(temp);
-        } else if (this.graphList.containsKey(s)){
-            this.graphList.get(s).add(temp);
-        }
-        // ADD BIDIRECTIONAL METHOD
-        if( !this.graphList.containsKey(e) ){
-            addVertex(e);
-            this.graphList.get(e).add(tempTwo);
-        }else {
-            this.graphList.get(e).add(tempTwo);
-        }
-    }
-    private void addVertex(int s){
-        this.graphList.put(s, new ArrayList<>());
-    }
 
-    public void Dijkstra(int startVertex, int endVertex) {
-        int path = 0;
-        while( startVertex != endVertex ){
-            int minWeight = Integer.MAX_VALUE;
-
-            for ( Integer key: this.graphList.keySet() ){
-                if ( key == startVertex){
-
-                    for ( int i = 0; i < this.graphList.get(key).size(); i++){
-                        if ( (int) this.graphList.get(key).get(i).values().toArray()[0] < minWeight ){
-                            minWeight = (int) this.graphList.get(key).get(i).values().toArray()[0];
-                        }
+            if (!visited.add(vertex)) continue;
+            for (Edge edge : adjacencyMap.get(vertex)) {
+                if (!visited.contains(edge.vertex)) {
+                    int newDist = distances.get(vertex) + edge.weight;
+                    if (newDist < distances.get(edge.vertex)) {
+                        distances.put(edge.vertex, newDist);
+                        pq.add(new Edge(edge.vertex, newDist));
+                        predecessors.put(edge.vertex, vertex);
                     }
-                    path += minWeight;
-                    System.out.println(minWeight);
                 }
             }
-
-
-
-
-            System.out.println(path);
-            startVertex = 2;
         }
+
+        printDijkstra(startVertex, targetVertex, distances, predecessors);
+    }
+
+    private void printDijkstra(int startVertex, int targetVertex, Map<Integer, Integer> distances, Map<Integer, Integer> predecessors) {
+
+        bufferedWriter = new BufferedWriter(fileWriter);
+
+        System.out.println("Dijkstra Algorithm: (Starting from vertex " + startVertex + ")");
+        try {
+            bufferedWriter.write("Dijkstra Algorithm: (Starting from vertex " + startVertex + ")\n");
+            bufferedWriter.write("Vertex " + targetVertex + " is at distance " + distances.get(targetVertex) + "\n");
+            bufferedWriter.write("Path: " + startVertex);
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        if (distances.get(targetVertex) == Integer.MAX_VALUE) {
+            System.out.println("No path from " + startVertex + " to " + targetVertex);
+            return;
+        }
+
+        System.out.println("Vertex " + targetVertex + " is at distance " + distances.get(targetVertex));
+        System.out.print("Path: ");
+        printPath(targetVertex, predecessors);
+        System.out.println();
+        System.out.println();
+        try {
+            bufferedWriter.write("\n\n");
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+    private void printPath(int currentVertex, Map<Integer, Integer> predecessors) {
+        if (!predecessors.containsKey(currentVertex)) {
+
+            System.out.print(currentVertex);
+            return;
+        }
+        printPath(predecessors.get(currentVertex), predecessors);
+
+        try {
+            bufferedWriter.write(" -> " + currentVertex);
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.print(" -> " + currentVertex);
     }
 }
-
 
 

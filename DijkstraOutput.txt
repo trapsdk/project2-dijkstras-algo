@@ -1,0 +1,8 @@
+Dijkstra Algorithm: (Starting from vertex 1)
+Vertex 37 is at distance 22
+Path: 1 -> 5 -> 25 -> 28 -> 32 -> 36 -> 35 -> 37
+
+Dijkstra Algorithm: (Starting from vertex 14)
+Vertex 23 is at distance 25
+Path: 14 -> 11 -> 12 -> 13 -> 10 -> 30 -> 37 -> 23
+

@@ -1,7 +1,11 @@
+// GABRIEL R CORTEZ
+/// CS 244
+//// 05/26/2024
+///// DIJKSTRA ALGORITHIM WITH UNDIRECTED WEIGHTED GRAPH
 public class Main {
     public static void main(String[] args) {
-        // INITIALIZING OUR graph
-        WeightedGraph graph = new WeightedGraph();
+        // INITIALIZING OUR GRAPH
+        Graph graph = new Graph();
 
 // 0
         graph.addEdge(0, 1, 8);
@@ -104,24 +108,10 @@ public class Main {
 // 36 All edges added
 // 37 All edges added
 
-//        System.out.println("Starting from 1 to 37");
-//        graph.Dijkstra(1,37);
-//        System.out.println("Starting from 14 to 23");
-//        graph.Dijkstra(14,23);
-
-        WeightedGraph graphTest = new WeightedGraph();
-        graphTest.addEdge(0,4,20);
-        graphTest.addEdge(0,1,10);
-        graphTest.addEdge(4,1,50);
-        graphTest.addEdge(4,3,70);
-        graphTest.addEdge(1,3,40);
-        graphTest.addEdge(1,2,30);
-        graphTest.addEdge(3,2,60);
-        graphTest.printAdjWithDistance();
-
-
-        graphTest.Dijkstra(0, 2);
-
+        System.out.println("Starting from 1 to 37");
+        graph.dijkstra(1, 37);
+        System.out.println("Starting from 14 to 23");
+        graph.dijkstra(14, 23);
 
     }
 }
